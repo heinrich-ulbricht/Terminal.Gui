@@ -8,9 +8,26 @@ using ReactiveMarbles.ObservableEvents;
 namespace ReactiveExample {
 	public class LoginView : Window, IViewFor<LoginViewModel> {
 		readonly CompositeDisposable _disposable = new CompositeDisposable();
-		
+		ScrollView scrollView;
+
 		public LoginView (LoginViewModel viewModel) : base("Reactive Extensions Example") {
 			ViewModel = viewModel;
+
+			scrollView = new ScrollView () {
+				X = 1,
+				Y = 1,
+				Width = Dim.Fill (),
+				Height = Dim.Fill (),
+				ContentSize = new () {
+					Height = 40,
+					Width = 150
+				},
+				AutoHideScrollBars = true,
+				ShowVerticalScrollIndicator = true,
+				ShowHorizontalScrollIndicator = true
+			};
+			Add (scrollView);
+
 			var title = TitleLabel ();
 			var usernameLengthLabel = UsernameLengthLabel (title);
 			var usernameInput = UsernameInput (usernameLengthLabel);
@@ -31,7 +48,7 @@ namespace ReactiveExample {
 
 		Label TitleLabel () {
 			var label = new Label("Login Form");
-			Add (label);
+			scrollView.Add (label);
 			return label;
 		}
 
@@ -52,7 +69,7 @@ namespace ReactiveExample {
 				.DistinctUntilChanged ()
 				.BindTo (ViewModel, x => x.Username)
 				.DisposeWith (_disposable);
-			Add (usernameInput);
+			scrollView.Add (usernameInput);
 			return usernameInput;
 		}
 
@@ -67,7 +84,7 @@ namespace ReactiveExample {
 				.Select (length => ustring.Make ($"Username ({length} characters)"))
 				.BindTo (usernameLengthLabel, x => x.Text)
 				.DisposeWith (_disposable);
-			Add (usernameLengthLabel);
+			scrollView.Add (usernameLengthLabel);
 			return usernameLengthLabel;
 		}
 
@@ -88,7 +105,7 @@ namespace ReactiveExample {
 				.DistinctUntilChanged ()
 				.BindTo (ViewModel, x => x.Password)
 				.DisposeWith (_disposable);
-			Add (passwordInput);
+			scrollView.Add (passwordInput);
 			return passwordInput;
 		}
 
@@ -103,7 +120,7 @@ namespace ReactiveExample {
 				.Select (length => ustring.Make ($"Password ({length} characters)"))
 				.BindTo (passwordLengthLabel, x => x.Text)
 				.DisposeWith (_disposable);
-			Add (passwordLengthLabel);
+			scrollView.Add (passwordLengthLabel);
 			return passwordLengthLabel;
 		}
 
@@ -125,7 +142,7 @@ namespace ReactiveExample {
 				.Select (valid => valid ? Colors.Base : Colors.Error)
 				.BindTo (validationLabel, x => x.ColorScheme)
 				.DisposeWith (_disposable);
-			Add (validationLabel);
+			scrollView.Add (validationLabel);
 			return validationLabel;
 		}
 
@@ -143,7 +160,7 @@ namespace ReactiveExample {
 				.ObserveOn (RxApp.MainThreadScheduler)
 				.BindTo (loginProgressLabel, x => x.Text)
 				.DisposeWith (_disposable);
-			Add (loginProgressLabel);
+			scrollView.Add (loginProgressLabel);
 			return loginProgressLabel;
 		}
 
@@ -158,7 +175,7 @@ namespace ReactiveExample {
 				.Clicked
 				.InvokeCommand (ViewModel, x => x.Login)
 				.DisposeWith (_disposable);
-			Add (loginButton);
+			scrollView.Add (loginButton);
 			return loginButton;
 		}
 
@@ -173,7 +190,7 @@ namespace ReactiveExample {
 				.Clicked
 				.InvokeCommand (ViewModel, x => x.Clear)
 				.DisposeWith (_disposable);
-			Add (clearButton);
+			scrollView.Add (clearButton);
 			return clearButton;
 		}
 		

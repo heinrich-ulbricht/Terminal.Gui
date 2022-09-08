@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NStack;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Terminal.Gui;
 
 namespace ReactiveExample {
 	//
@@ -35,7 +36,7 @@ namespace ReactiveExample {
 			
 			_isValid = canLogin.ToProperty (this, x => x.IsValid);
 			Login = ReactiveCommand.CreateFromTask (
-				() => Task.Delay (TimeSpan.FromSeconds (1)),
+				SomeAsyncAction,
 				canLogin);
 			
 			_usernameLength = this
@@ -53,7 +54,29 @@ namespace ReactiveExample {
 				Password = ustring.Empty;
 			});
 		}
-		
+
+		private static async Task SomeAsyncAction ()
+		{
+			// WITHOUT this additional wait the bug does not surface
+			await Task.Delay (500);
+			await ShowMessageBox (false, "Test", "Test", "Close");
+		}
+
+		private static async Task ShowMessageBox (bool isError, ustring title, ustring message, params ustring [] buttons)
+		{
+			var tcs = new TaskCompletionSource<int> ();
+			Application.MainLoop.Invoke (() => {
+				if (isError) {
+					var result = MessageBox.ErrorQuery (title, message, buttons);
+					tcs.SetResult (result);
+				} else {
+					var result = MessageBox.Query (title, message, buttons);
+					tcs.SetResult (result);
+				}
+			});
+			_ = await tcs.Task.ConfigureAwait (false);
+		}
+
 		[Reactive, DataMember]
 		public ustring Username { get; set; } = ustring.Empty;
 		
